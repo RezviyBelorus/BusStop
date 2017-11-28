@@ -1,12 +1,13 @@
 package entity;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class Bus {
 
     private String companyName;
-    private LocalTime departure;
-    private LocalTime arriving;
+    private LocalDateTime departure;
+    private LocalDateTime arriving;
 
     public String getCompanyName() {
         return companyName;
@@ -16,19 +17,19 @@ public class Bus {
         this.companyName = companyName;
     }
 
-    public LocalTime getDeparture() {
+    public LocalDateTime getDeparture() {
         return departure;
     }
 
-    public void setDeparture(LocalTime departure) {
+    public void setDeparture(LocalDateTime departure) {
         this.departure = departure;
     }
 
-    public LocalTime getArriving() {
+    public LocalDateTime getArriving() {
         return arriving;
     }
 
-    public void setArriving(LocalTime arriving) {
+    public void setArriving(LocalDateTime arriving) {
         this.arriving = arriving;
     }
 
@@ -36,22 +37,18 @@ public class Bus {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
-        Bus schedule = (Bus) o;
-
-        if (departure != null ? !departure.equals(schedule.departure) : schedule.departure != null) return false;
-        return arriving != null ? arriving.equals(schedule.arriving) : schedule.arriving == null;
+        Bus bus = (Bus) o;
+        return Objects.equals(departure, bus.departure) &&
+                Objects.equals(arriving, bus.arriving);
     }
 
     @Override
     public int hashCode() {
-        int result = departure != null ? departure.hashCode() : 0;
-        result = 31 * result + (arriving != null ? arriving.hashCode() : 0);
-        return result;
+        return Objects.hash(departure, arriving);
     }
 
     @Override
     public String toString() {
-        return companyName + " " + departure + " " + arriving;
+        return companyName + " " + departure.toLocalTime() + " " + arriving.toLocalTime();
     }
 }

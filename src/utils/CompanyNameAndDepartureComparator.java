@@ -4,7 +4,7 @@ import entity.Bus;
 
 import java.util.Comparator;
 
-public class DepartureComparator implements Comparator<Bus> {
+public class CompanyNameAndDepartureComparator implements Comparator<Bus> {
     @Override
     public int compare(Bus o1, Bus o2) {
         int i = o2.getCompanyName().compareTo(o1.getCompanyName());
