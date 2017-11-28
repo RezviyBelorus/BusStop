@@ -14,7 +14,6 @@ import java.util.*;
  * @author Aleksandr Fomin
  */
 public class ScheduleModifier {
-    private final static String POSH = "Posh";
     private final static String GROTTY = "Grotty";
 
     /**
@@ -24,12 +23,12 @@ public class ScheduleModifier {
      * @param outPutFile path to output file
      */
     public static void getBestBuses(String inputFile, String outPutFile) {
-        List<Bus> buses = ScheduleParser.parse(inputFile);
+        List<Bus> buses = ScheduleParser.parseFile(inputFile);
 
         Set<Bus> uniqueBuses = removeDublicates(buses);
 
         Set<Bus> result = getValidBuses(uniqueBuses);
-        Set<Bus> sortedBuses = new TreeSet<>(new DepartureComparator());
+        Set<Bus> sortedBuses = new TreeSet<>(new CompanyNameAndDepartureComparator());
         sortedBuses.addAll(result);
 
         int delimiter = findDelimiter(sortedBuses);
@@ -44,17 +43,9 @@ public class ScheduleModifier {
      * @return Set<Bus>
      */
     private static Set<Bus> removeDublicates(List<Bus> basicBuses) {
-        Set<Bus> uniqueBuses = new HashSet<>();
-        basicBuses.forEach(bus -> {
-            if (uniqueBuses.contains(bus)) {
-                if (bus.getCompanyName().equals(POSH)) {
-                    uniqueBuses.remove(bus);
-                    uniqueBuses.add(bus);
-                }
-            } else uniqueBuses.add(bus);
 
-        });
-        return uniqueBuses;
+        Collections.sort(basicBuses, new CompanyNameAndDepartureComparator());
+        return new HashSet<>(basicBuses);
     }
 
     /**
@@ -88,29 +79,32 @@ public class ScheduleModifier {
      */
     public static Set<Bus> getValidBuses(Set<Bus> buses) {
         Iterator<Bus> iterator = buses.iterator();
+        int hour = 60*60;
         while (iterator.hasNext()) {
             Bus next = iterator.next();
             Duration between = Duration.between(next.getDeparture(), next.getArriving());
             long routeDurationSec = between.getSeconds();
             boolean isLongRoute = false;
-            if (routeDurationSec > 60 * 60) {
+            if (routeDurationSec > hour) {
                 iterator.remove();
                 isLongRoute = true;
             }
+            List<Bus> busList = new ArrayList<>();
+            busList.addAll(buses);
             if (!isLongRoute) {
-                List<Bus> busList = new ArrayList<>();
-                busList.addAll(buses);
                 for (int i = 0; i < busList.size(); i++) {
+                    boolean isDelete = false;
                     int departure = busList.get(i).getDeparture().compareTo(next.getDeparture());
                     int arriving = busList.get(i).getArriving().compareTo(next.getArriving());
 
                     if (departure > 0 && arriving <= 0) {
-                        iterator.remove();
-                        break;
+                        isDelete = true;
                     }
                     if (departure == 0 && arriving < 0) {
+                        isDelete = true;
+                    }
+                    if (isDelete) {
                         iterator.remove();
-                        break;
                     }
                 }
             }
@@ -123,7 +117,7 @@ public class ScheduleModifier {
      *
      * @param bestBuses        collection of buses which will be write to file
      * @param pathToOutPutFile path to out put file
-     * @param indexOfDelimiter point which devides schedule in to two parts
+     * @param indexOfDelimiter point which divides schedule in to two parts
      * @throws IOException if something was incorrect
      */
     private static void writeScheduleToFile(Set<Bus> bestBuses, String pathToOutPutFile, int indexOfDelimiter) {
