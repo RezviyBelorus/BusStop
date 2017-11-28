@@ -14,6 +14,7 @@ import java.util.*;
  * @author Aleksandr Fomin
  */
 public class ScheduleModifier {
+    private static final String DELIMITER = " ";
     private final static String GROTTY = "Grotty";
 
     /**
@@ -129,7 +130,7 @@ public class ScheduleModifier {
                 writer.write(bus.toString());
                 writer.newLine();
                 if (pointForNewTimeTable == indexOfDelimiter) {
-                    writer.write(" ");
+                    writer.write(DELIMITER);
                     writer.newLine();
                 }
                 pointForNewTimeTable++;
